@@ -40,7 +40,15 @@ class Alarm extends EventEmitter
   Internal: Panel data has been received. Parse it, keep state, and emit events when state changes.
   ###
   handlePanelData: (msg) ->
+    # The panel message is comprised of four parts separated by commas.
+    # PARTS:   [Bit field], Numeric code, [Raw data],	Alphanumeric Keypad Message
+    # EXAMPLE: [00110011000000003A--],010,[f70700000010808c18020000000000],"ARMED ***STAY** ZONE BYPASSED "
+    # REFERENCE: http://www.alarmdecoder.com/wiki/index.php/Protocol#Format
     parts = msg.split(',')
+
+    # We need to limit the split to 4 parts because there can be additional commas in the Alphanumeric Keypad Message
+    # EXAMPLE: [0001100000000000----],0f5,[f700001f10f5000c40011f00000000],"Set to Confirm? 0=No,1=Yes     0"
+    parts[3] = parts.slice(3).join(',');  # repack any remaining data into part 4
 
     # Keep record of each section of the message
     sections = []
